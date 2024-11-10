@@ -1,74 +1,191 @@
-<<<<<<< HEAD
-# Getting Started with Create React App
+# Attendance Management System 📚✅
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A modern web-based solution for managing student attendance efficiently and effectively.
 
-## Available Scripts
+## 🌟 Features
 
-In the project directory, you can run:
+- User Authentication and Authorization
+- Student Management System
+- Real-time Attendance Tracking
+- Automated Attendance Percentage Calculation
+- Interactive Dashboard
+- Statistical Reports
+- Responsive Design
 
-### `npm start`
+## 🛠️ Tech Stack
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+### Frontend
+- React.js
+- Material-UI
+- Context API
+- React Router
+- Recharts for visualization
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+### Backend
+- Node.js
+- Express.js
+- MySQL
+- JWT Authentication
+- bcrypt for password hashing
 
-### `npm test`
+## 🚀 Getting Started
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### Prerequisites
+```bash
+# Required on your system
+- Node.js (v14 or higher)
+- MySQL (v8.0 or higher)
+- npm (v6 or higher)
+```
 
-### `npm run build`
+### Installation
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+1. Clone the repository
+```bash
+git clone https://github.com/yourusername/attendance-management-system.git
+cd attendance-management-system
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+2. Install dependencies
+```bash
+# Install backend dependencies
+cd server
+npm install
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+# Install frontend dependencies
+cd ../client
+npm install
+```
 
-### `npm run eject`
+3. Configure Environment Variables
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+Create `.env` file in server directory:
+```env
+DB_HOST=localhost
+DB_USER=your_database_user
+DB_PASSWORD=your_database_password
+DB_DATABASE=auth_db
+PORT=5000
+JWT_SECRET=your_jwt_secret
+```
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+Create `.env` file in client directory:
+```env
+REACT_APP_API_URL=http://localhost:5000/api
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+4. Initialize Database
+```bash
+# Log into MySQL and create database
+mysql -u root -p
+CREATE DATABASE auth_db;
+```
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+5. Start the Application
+```bash
+# Start backend server (from server directory)
+npm start
 
-## Learn More
+# Start frontend development server (from client directory)
+npm start
+```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+The application will be available at `http://localhost:3000`
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## 📁 Project Structure
 
-### Code Splitting
+```
+attendance-system/
+├── client/
+│   ├── src/
+│   │   ├── components/
+│   │   ├── context/
+│   │   ├── pages/
+│   │   └── shared-theme/
+│   └── public/
+└── server/
+    ├── config/
+    ├── routes/
+    ├── middleware/
+    └── utils/
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+## 🔥 Usage
 
-### Analyzing the Bundle Size
+1. Sign up as a new user
+2. Log in to the system
+3. Add students to the system
+4. Mark and manage attendance
+5. View statistics and reports
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+## 📊 API Endpoints
 
-### Making a Progressive Web App
+### Authentication
+- POST `/api/signup` - Register new user
+- POST `/api/signin` - User login
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+### Students
+- GET `/api/students` - Get all students
+- POST `/api/students` - Add new student
+- DELETE `/api/students/:id` - Delete student
 
-### Advanced Configuration
+### Attendance
+- POST `/api/attendance` - Mark attendance
+- GET `/api/attendance/report` - Get attendance report
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+## 🔒 Security Features
 
-### Deployment
+- Password Hashing
+- JWT Authentication
+- Input Validation
+- SQL Injection Prevention
+- XSS Protection
+- Rate Limiting
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+## 🤝 Contributing
 
-### `npm run build` fails to minify
+1. Fork the repository
+2. Create your feature branch
+   ```bash
+   git checkout -b feature/AmazingFeature
+   ```
+3. Commit your changes
+   ```bash
+   git commit -m 'Add some AmazingFeature'
+   ```
+4. Push to the branch
+   ```bash
+   git push origin feature/AmazingFeature
+   ```
+5. Open a Pull Request
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
-=======
-# Attendance-System
->>>>>>> 9c7974fd9bf988d15e357dc34acc48d537287438
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
+
+## 👥 Authors
+
+- **Krithick S** - *Initial work* - [KrithickS](https://github.com/KrithickS)
+
+## 🙏 Acknowledgments
+
+- Material-UI for the awesome component library
+- React team for the amazing framework
+- Node.js community for the excellent backend runtime
+- All contributors who participated in this project
+
+## 📞 Support
+
+For support, email krithick2004@gmail or create an issue in the repository.
+
+## 🔮 Future Updates
+
+- Mobile Application
+- Advanced Analytics
+- Email Notifications
+- Multiple User Roles
+- Automated Reports
+- Biometric Integration
+
+---
+⭐️ Star this repo if you find it helpful!
