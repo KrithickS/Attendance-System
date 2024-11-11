@@ -19,6 +19,7 @@ import AppTheme from '../shared-theme/AppTheme';
 import ColorModeSelect from '../shared-theme/ColorModeSelect';
 import { useAuth } from '../context/AuthContext';
 import logo from '../assets/logo.png';
+import CircularProgress from '@mui/material/CircularProgress';
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: 'flex',
@@ -85,6 +86,8 @@ export default function SignIn(props) {
     if (!validateInputs()) {
       return;
     }
+
+    setIsSubmitting(true);
   
     try {
       const response = await fetch('http://localhost:5000/api/signin', {
@@ -118,6 +121,8 @@ export default function SignIn(props) {
       console.error('Error during signin:', error);
       setEmailError(true);
       setEmailErrorMessage('An error occurred. Please try again.');
+    } finally {
+      setIsSubmitting(false); // Add this
     }
   };
 
@@ -245,6 +250,7 @@ export default function SignIn(props) {
               fullWidth
               variant="contained"
               disabled={isSubmitting}
+              startIcon={isSubmitting ? <CircularProgress size={20} /> : null}
             >
               {isSubmitting ? 'Signing in...' : 'Sign in'}
             </Button>
