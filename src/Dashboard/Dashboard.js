@@ -34,6 +34,9 @@ import {
 } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
+import dayjs from 'dayjs';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -53,6 +56,7 @@ export default function Dashboard() {
     name: '',
     regno: ''
   });
+  const [selectedDate, setSelectedDate] = useState(dayjs());
 
   // Check for authentication
   // At the top of your Dashboard component
@@ -110,7 +114,8 @@ useEffect(() => {
     try {
       setLoading(true);
       setError('');
-      const response = await fetch('http://localhost:5000/api/students');
+      const formattedDate = selectedDate.format('YYYY-MM-DD');
+      const response = await fetch(`http://localhost:5000/api/students?date=${formattedDate}`);
       const data = await response.json();
       
       if (response.ok) {
@@ -125,14 +130,21 @@ useEffect(() => {
     } finally {
       setLoading(false);
     }
-  }, [updateStats]);
+  }, [updateStats, selectedDate]);
+
+  const isWithinLast30Days = useCallback((date) => {
+    const thirtyDaysAgo = dayjs().subtract(30, 'days').startOf('day');
+    return date.isAfter(thirtyDaysAgo) || date.isSame(thirtyDaysAgo, 'day');
+  }, []);
 
   const handleAttendanceToggle = useCallback(async (studentId, currentStatus) => {
-    console.log('Current user:', user); // Debug log
-    
     if (!user || !user.id) {
-      console.error('No user ID found:', user);
       setError('Authentication error. Please try signing in again.');
+      return;
+    }
+  
+    if (!isWithinLast30Days(selectedDate)) {
+      setError("Attendance can only be modified for the last 30 days");
       return;
     }
   
@@ -144,7 +156,7 @@ useEffect(() => {
       
       const attendanceData = {
         studentId,
-        date: new Date().toISOString().split('T')[0],
+        date: selectedDate.format('YYYY-MM-DD'),
         status: newStatus,
         userId: user.id
       };
@@ -170,7 +182,7 @@ useEffect(() => {
           )
         );
         setSuccess(`Attendance marked as ${newStatus}`);
-        await fetchStudents(); // Refresh data
+        await fetchStudents();
       } else {
         console.error('Attendance update failed:', data);
         setError(data.error || 'Failed to update attendance');
@@ -181,7 +193,7 @@ useEffect(() => {
     } finally {
       setMarkingAttendance(false);
     }
-  }, [user, fetchStudents, setError, setSuccess, setMarkingAttendance]);
+  }, [user, fetchStudents, selectedDate, isWithinLast30Days]);
 
   const handleAddStudent = useCallback(async () => {
     if (!newStudent.name || !newStudent.regno) {
@@ -225,16 +237,21 @@ useEffect(() => {
     navigate('/signin');
   }, [logout, navigate]);
 
-  const renderAttendanceButton = useCallback((student) => (
-    <IconButton
-      onClick={() => handleAttendanceToggle(student.id, student.today_status)}
-      color={student.today_status === 'present' ? 'success' : 'error'}
-      disabled={markingAttendance}
-      size="large"
-    >
-      {student.today_status === 'present' ? <CheckIcon /> : <CloseIcon />}
-    </IconButton>
-  ), [handleAttendanceToggle, markingAttendance]);
+  const renderAttendanceButton = useCallback((student) => {
+    const canModifyAttendance = isWithinLast30Days(selectedDate);
+  
+    return (
+      <IconButton
+        onClick={() => handleAttendanceToggle(student.id, student.today_status)}
+        color={student.today_status === 'present' ? 'success' : 'error'}
+        disabled={markingAttendance || !canModifyAttendance}
+        size="large"
+        title={!canModifyAttendance ? "Attendance can only be modified for the last 30 days" : ""}
+      >
+        {student.today_status === 'present' ? <CheckIcon /> : <CloseIcon />}
+      </IconButton>
+    );
+  }, [handleAttendanceToggle, markingAttendance, selectedDate, isWithinLast30Days]);
 
   if (!user) {
     return (
@@ -264,6 +281,53 @@ useEffect(() => {
           </IconButton>
         </Toolbar>
       </AppBar>
+
+      <Box sx={{ p: 2, bgcolor: 'background.paper' }}>
+        <Container maxWidth="lg">
+          <Box display="flex" flexDirection="column" gap={2}>
+            <Box display="flex" alignItems="center" justifyContent="space-between">
+              <Typography variant="h6" component="div">
+                Attendance for:
+              </Typography>
+              <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <DatePicker
+                  label="Select Date"
+                  value={selectedDate}
+                  onChange={(newDate) => {
+                    setSelectedDate(newDate);
+                    fetchStudents();
+                  }}
+                  maxDate={dayjs()}
+                  minDate={dayjs().subtract(180, 'days')}
+                  format="DD/MM/YYYY"
+                  sx={{ width: 220 }}
+                  slotProps={{
+                    textField: {
+                      helperText: isWithinLast30Days(selectedDate) 
+                        ? 'Attendance can be modified for this date' 
+                        : 'View only - Cannot modify attendance for this date'
+                    }
+                  }}
+                />
+              </LocalizationProvider>
+            </Box>
+
+            <Typography variant="body2" color="textSecondary">
+              Editable Range: {dayjs().subtract(30, 'days').format('MMM D, YYYY')} - {dayjs().format('MMM D, YYYY')}
+            </Typography>
+
+            {!isWithinLast30Days(selectedDate) ? (
+              <Alert severity="warning">
+                You are viewing attendance records older than 30 days. These records cannot be modified.
+              </Alert>
+            ) : selectedDate.isBefore(dayjs(), 'day') ? (
+              <Alert severity="info">
+                Viewing past attendance records. Records within the last 30 days can be modified.
+              </Alert>
+            ) : null}
+          </Box>
+        </Container>
+      </Box>
 
       <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
         {error && (
@@ -296,7 +360,10 @@ useEffect(() => {
             <Card>
               <CardContent>
                 <Typography color="textSecondary" gutterBottom>
-                  Present Today
+                  {dayjs().isSame(selectedDate, 'day') 
+                    ? 'Present Today'
+                    : `Present on ${selectedDate.format('MMM D, YYYY')}`
+                  }
                 </Typography>
                 <Typography variant="h4" color="success.main">
                   {stats.presentToday}
@@ -348,9 +415,17 @@ useEffect(() => {
                 <TableRow>
                   <TableCell>Reg No</TableCell>
                   <TableCell>Name</TableCell>
-                  <TableCell align="center">Today's Status</TableCell>
+                  <TableCell align="center">
+                    {dayjs().isSame(selectedDate, 'day') 
+                      ? "Today's Status"
+                      : `Status on ${selectedDate.format('MMM D, YYYY')}`
+                    }
+                  </TableCell>
                   <TableCell align="center">Attendance %</TableCell>
-                  <TableCell align="center">Mark Attendance</TableCell>
+                  <TableCell align="center">
+                    Mark Attendance
+                    {!isWithinLast30Days(selectedDate) && ' (View Only)'}
+                  </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
