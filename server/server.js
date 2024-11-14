@@ -130,8 +130,11 @@ app.post('/api/signin', async (req, res) => {
 });
 
 // Get all students
+// Update the students endpoint to handle date parameter
 app.get('/api/students', async (req, res) => {
   try {
+    const date = req.query.date || new Date().toISOString().split('T')[0];
+
     const [students] = await db.query(`
       SELECT 
         s.id,
@@ -142,13 +145,13 @@ app.get('/api/students', async (req, res) => {
           (SELECT status 
            FROM attendance_records 
            WHERE student_id = s.id 
-           AND date = CURRENT_DATE
+           AND date = ?
            LIMIT 1), 
           'absent'
         ) as today_status
       FROM students s
       ORDER BY s.name
-    `);
+    `, [date]);
     
     const formattedResults = students.map(student => ({
       ...student,
